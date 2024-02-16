@@ -1,26 +1,19 @@
-# serializers.py
-
 from rest_framework import serializers
-from .models import CustomUser, AdminProfile, LawyerProfile, CustomerProfile
+from .models import CustomUser
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = CustomUser
-        fields = ('id', 'first_name', 'last_name', 'email', 'username', 'password', 'user_type')
-        extra_kwargs = {'password': {'write_only': True}}
-        
+        fields = ('id', 'username', 'email', 'password', 'first_name', 'last_name', 'user_type', 'email_verified', 'profile_image', 'bio', 'category', 'experience', 'working_in', 'rate', 'description')
+        extra_kwargs = {
+            'email': {'required': True}
+        }
 
-class AdminProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AdminProfile
-        fields = '__all__'
-
-class LawyerProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LawyerProfile
-        fields = '__all__'
-
-class CustomerProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomerProfile
-        fields = '__all__'
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = CustomUser.objects.create(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
