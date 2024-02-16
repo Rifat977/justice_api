@@ -51,6 +51,22 @@ class UserProfileAPIView(APIView):
 
     def put(self, request):
         user = request.user
+        new_user_type = request.data.get('user_type')
+        
+        current_user_type = user.user_type
+        
+        if new_user_type == 'admin':
+            return Response({'error': 'User cannot be changed to admin'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if new_user_type in ['customer', 'lawyer'] and new_user_type != current_user_type:
+            if current_user_type != 'admin':
+                user.user_type = new_user_type
+                user.save()
+                serializer = CustomUserSerializer(user)
+                return Response(serializer.data)
+            else:
+                return Response({'error': 'Admin cannot change user type'}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = CustomUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()

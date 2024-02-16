@@ -17,3 +17,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+    def update(self, instance, validated_data):
+        validated_data.pop('email_verified', None)
+        validated_data.pop('rate', None)
+        return super().update(instance, validated_data)
