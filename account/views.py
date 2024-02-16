@@ -5,6 +5,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import *
 from .serializers import *
+from .permission import *
+from rest_framework import generics
 
 class UserRegistrationAPIView(APIView):
     permission_classes = [AllowAny]
@@ -90,3 +92,24 @@ class UserLoginAPIView(APIView):
             else:
                 return Response({'error': 'Email not verified'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class LawyerListAPIView(generics.ListAPIView):
+    queryset = CustomUser.objects.filter(user_type='lawyer')
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
+
+class LawyerRetrieveAPIView(generics.RetrieveAPIView):
+    queryset = CustomUser.objects.filter(user_type='lawyer')
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
+
+class CustomerListAPIView(generics.ListAPIView):
+    queryset = CustomUser.objects.filter(user_type='customer')
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+class CustomerRetrieveAPIView(generics.RetrieveAPIView):
+    queryset = CustomUser.objects.filter(user_type='customer')
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+
